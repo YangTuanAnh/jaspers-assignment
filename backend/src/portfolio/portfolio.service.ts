@@ -150,15 +150,17 @@ export class PortfolioService {
 
     try {
       const [accountResponse, positionsResponse] = await Promise.all([
-        axios.get(`${baseUrl}/v2/account`, { headers }),
-        axios.get(`${baseUrl}/v2/positions`, { headers }),
+        axios.get<AlpacaAccount>(`${baseUrl}/v2/account`, { headers }),
+        axios.get<AlpacaPosition[]>(`${baseUrl}/v2/positions`, { headers }),
       ]);
+
+      const positionsData = Array.isArray(positionsResponse.data)
+        ? positionsResponse.data
+        : [];
 
       return {
         account: accountResponse.data,
-        positions: Array.isArray(positionsResponse.data)
-          ? positionsResponse.data
-          : [],
+        positions: positionsData,
       };
     } catch (error) {
       this.logger.error('Failed to fetch data from Alpaca', error as Error);
