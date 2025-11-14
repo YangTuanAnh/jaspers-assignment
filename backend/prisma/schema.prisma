@@ -1,0 +1,63 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           Int                 @id @default(autoincrement())
+  email        String              @unique @db.VarChar(255)
+  passwordHash String              @map("password_hash") @db.VarChar(255)
+  createdAt    DateTime            @default(now()) @map("created_at")
+  holdings     PortfolioHolding[]
+  chatMessages ChatMessage[]
+  account      PortfolioAccount?
+
+  @@map("users")
+}
+
+model PortfolioHolding {
+  id           Int       @id @default(autoincrement())
+  userId       Int       @map("user_id")
+  symbol       String    @db.VarChar(20)
+  quantity     Decimal   @db.Decimal(20, 8)
+  averageCost  Decimal?  @map("average_cost") @db.Decimal(20, 4)
+  currentPrice Decimal?  @map("current_price") @db.Decimal(20, 4)
+  marketValue  Decimal?  @map("market_value") @db.Decimal(20, 4)
+  updatedAt    DateTime  @default(now()) @map("updated_at") @updatedAt
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("portfolio_holdings")
+  @@index([userId, symbol])
+}
+
+model PortfolioAccount {
+  id           Int      @id @default(autoincrement())
+  userId       Int      @unique @map("user_id")
+  cashBalance  Decimal  @map("cash_balance") @default(0) @db.Decimal(20, 4)
+  lastSyncedAt DateTime @map("last_synced_at") @default(now()) @updatedAt
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("portfolio_accounts")
+}
+
+model ChatMessage {
+  id        Int      @id @default(autoincrement())
+  userId    Int      @map("user_id")
+  role      ChatRole
+  content   String
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("chat_messages")
+  @@index([userId, createdAt])
+}
+
+enum ChatRole {
+  user
+  assistant
+}
+
