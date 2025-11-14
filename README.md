@@ -34,6 +34,7 @@ A minimal full-stack assessment that demonstrates user authentication, Alpaca po
    cp env.example .env      # update the values
    pnpm install
    pnpm prisma migrate dev  # creates tables defined in prisma/schema.prisma
+   pnpm db:seed # Add demo account
    pnpm start:dev           # http://localhost:3000/api
    ```
 
