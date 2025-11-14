@@ -1,161 +1,63 @@
-# Jaspers AI – Portfolio Chat MVP
+## Jaspers AI – Portfolio Chat MVP
 
-A minimal full-stack application demonstrating:
+A minimal full-stack assessment that demonstrates user authentication, Alpaca portfolio ingestion, and an AI-powered chat assistant. The project consists of a NestJS backend and a Next.js frontend.
 
-* Email/password authentication (JWT)
-* Portfolio ingestion via Alpaca
-* AI-assisted chat (Claude/OpenAI or deterministic fallback)
-* Fully containerized deployment with Docker Compose (frontend, backend, PostgreSQL)
-
----
-
-## Project Structure
+### Project Layout
 
 ```
 .
-├── backend/          # NestJS (Auth, Portfolio, Chat) + Prisma ORM
-├── frontend/         # Next.js 16 App Router UI
-└── docker-compose.yaml
+├── backend/   # NestJS API + Prisma + PostgreSQL
+├── frontend/  # Next.js 16 app router UI
+└── docker-compose.yaml  # Local Postgres helper
 ```
 
----
+### Prerequisites
 
-## Requirements
+- Node.js 20+
+- pnpm 9+
+- Docker (only required if you want to spin up the local Postgres instance quickly)
+- PostgreSQL 15+
+- Alpaca + Anthropic/OpenAI API keys (optional – mock data is used if keys are missing)
 
-* Docker & Docker Compose
-* Optional:
+### Quick Start
 
-  * Alpaca API keys
-  * Anthropic/OpenAI API keys
-    (App automatically uses mock data when keys are absent.)
+1. **Start PostgreSQL**
 
-No local Node.js or PostgreSQL installation is required — everything runs inside containers.
+   ```bash
+   docker compose up -d postgres
+   ```
 
----
+2. **Backend**
 
-## Quick Start (Fully Dockerized)
+   ```bash
+   cd backend
+   cp env.example .env      # update the values
+   pnpm install
+   pnpm prisma migrate dev  # creates tables defined in prisma/schema.prisma
+   pnpm start:dev           # http://localhost:3000/api
+   ```
 
-### 1. Launch all services
+3. **Frontend**
 
-```bash
-docker compose up -d
-```
+   ```bash
+   cd frontend
+   cp env.example .env.local   # optional – defaults to http://localhost:3000/api
+   pnpm install
+   pnpm dev                    # http://localhost:3001
+   ```
 
-This brings up:
+### Key Features
 
-* **backend** (NestJS)
-* **frontend** (Next.js)
-* **postgres** (database with persistent volume)
+- Email/password auth with JWT + bcrypt
+- Protected NestJS endpoints for portfolio and chat
+- Prisma schema + migrations for the required tables
+- Alpaca API integration with manual sync support (falls back to mock data if keys are missing)
+- Chat endpoint that calls Claude/OpenAI when keys are provided (and a deterministic fallback otherwise)
+- React dashboard & chat UI that consumes the backend APIs
 
----
+More detailed instructions for each app live inside `backend/README.md` and `frontend/README.md`.
 
-### 2. Apply Prisma migrations
-
-Run the migration inside the backend container:
-
-```bash
-docker compose exec backend pnpm prisma migrate deploy
-```
-
-If you need initial seed data:
-
-```bash
-docker compose exec backend pnpm prisma db seed
-```
-
----
-
-### 3. Access the applications
-
-| Service              | URL                                                    |
-| -------------------- | ------------------------------------------------------ |
-| Frontend (Next.js)   | [http://localhost:3001](http://localhost:3001)         |
-| Backend API (NestJS) | [http://localhost:3000/api](http://localhost:3000/api) |
-| PostgreSQL           | localhost:5432                                         |
-
----
-
-## Environment Variables
-
-Each service has its own env file.
-
-### Backend
-
-`backend/.env`
-
-```
-DATABASE_URL=postgresql://postgres:postgres@postgres:5432/jaspers_local
-JWT_SECRET=your-secret
-ALPACA_KEY_ID=
-ALPACA_SECRET_KEY=
-ANTHROPIC_API_KEY=
-OPENAI_API_KEY=
-```
-
-### Frontend
-
-`frontend/.env.local`
-
-```
-NEXT_PUBLIC_API_URL=http://localhost:3000/api
-```
-
----
-
-## Docker Compose Setup
-
-A sample structure (your actual file may differ):
-
-```yaml
-version: "3.9"
-
-services:
-  postgres:
-    image: postgres:15
-    restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: jaspers_local
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-
-  backend:
-    build: ./backend
-    ports:
-      - "3000:3000"
-    env_file:
-      - ./backend/.env
-    depends_on:
-      - postgres
-
-  frontend:
-    build: ./frontend
-    ports:
-      - "3001:3000"
-    env_file:
-      - ./frontend/.env.local
-    depends_on:
-      - backend
-
-volumes:
-  postgres_data:
-```
-
----
-
-## Key Features
-
-* **Secure JWT authentication** (email + password)
-* **Prisma-powered data storage**
-* **Alpaca portfolio ingestion** (with mock fallback)
-* **AI chat endpoint** (Claude/OpenAI or fallback)
-* **Next.js dashboard & chat UI**
-* **Single command deployment** via Docker Compose
-
-## Screenshots
+### Screenshots
 
 Authentication screen:
 ![](screenshots/auth.png)
