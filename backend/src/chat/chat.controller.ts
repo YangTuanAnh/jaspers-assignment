@@ -16,11 +16,7 @@ export class ChatController {
   }
 
   @Post('messages')
-  sendMessage(
-    @CurrentUser() user: AuthUser,
-    @Body() dto: SendMessageDto,
-  ) {
+  sendMessage(@CurrentUser() user: AuthUser, @Body() dto: SendMessageDto) {
     return this.chatService.createMessage(user.id, dto);
   }
 }
-

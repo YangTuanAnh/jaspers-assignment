@@ -1,98 +1,69 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+## Backend – NestJS + Prisma API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+This service powers authentication, portfolio ingestion, and the AI chat endpoints. It exposes a REST API under the `/api` prefix and persists data to PostgreSQL via Prisma.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+### Tech Stack
 
-## Description
+- NestJS 11
+- Prisma ORM + PostgreSQL 15
+- JWT authentication (`@nestjs/jwt`)
+- Axios for Alpaca integration
+- Undici `fetch` for Anthropic/OpenAI calls
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
-
-## Project setup
+### Getting Started
 
 ```bash
-$ pnpm install
+pnpm install
+cp env.example .env            # fill in secrets
+pnpm prisma migrate dev        # create tables & sync schema
+pnpm start:dev                 # http://localhost:3000/api
 ```
 
-## Compile and run the project
+> Need demo data quickly? Run `pnpm db:seed` to create a `demo@jaspers.ai / DemoPass123!` user.
 
-```bash
-# development
-$ pnpm run start
+### Environment Variables
 
-# watch mode
-$ pnpm run start:dev
+`env.example` documents every variable. Required values:
 
-# production mode
-$ pnpm run start:prod
-```
+| Variable | Description |
+| --- | --- |
+| `DATABASE_URL` | PostgreSQL connection string |
+| `JWT_SECRET` | Secret used for signing access tokens |
+| `ALPACA_API_KEY` / `ALPACA_SECRET_KEY` | Paper trading keys (optional – mock data used when missing) |
+| `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` | AI provider key (optional – fallback text used when missing) |
 
-## Run tests
+### Database Schema
 
-```bash
-# unit tests
-$ pnpm run test
+Prisma models map directly to the required tables:
 
-# e2e tests
-$ pnpm run test:e2e
+- `users` – auth credentials
+- `portfolio_holdings` – per-symbol holdings
+- `portfolio_accounts` – cash balance + last sync timestamp
+- `chat_messages` – conversation history
 
-# test coverage
-$ pnpm run test:cov
-```
+All migrations live under `prisma/migrations`. Use `pnpm prisma migrate dev` to evolve the schema locally or `pnpm prisma migrate deploy` in production.
 
-## Deployment
+### API Surface
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+| Method | Route | Description |
+| --- | --- | --- |
+| `POST` | `/api/auth/register` | Register a user and return a JWT |
+| `POST` | `/api/auth/login` | Login with email/password |
+| `GET` | `/api/auth/me` | Fetch the authenticated profile |
+| `GET` | `/api/portfolio` | Read holdings + summary |
+| `POST` | `/api/portfolio/sync` | Pull latest data from Alpaca |
+| `GET` | `/api/chat/messages` | List chat history |
+| `POST` | `/api/chat/messages` | Send a prompt and receive the AI reply |
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+All non-auth routes require an `Authorization: Bearer <token>` header.
 
-```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
-```
+### Testing & Tooling
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+- `pnpm test` – unit tests (currently covers the health endpoint)
+- `pnpm lint` – ESLint
+- `pnpm format` – Prettier
 
-## Resources
+### Notes
 
-Check out a few resources that may come in handy when working with NestJS:
-
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+- When Alpaca/LLM keys are missing the API logs a warning and returns deterministic mock data so the UI stays usable.
+- CORS is enabled for `http://localhost:3001` by default. Override via `FRONTEND_URL`.

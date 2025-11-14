@@ -85,7 +85,10 @@ export class AuthService {
     };
   }
 
-  async validateUser(payload: { sub: number; email: string }): Promise<AuthUser> {
+  async validateUser(payload: {
+    sub: number;
+    email: string;
+  }): Promise<AuthUser> {
     const user = await this.prisma.user.findUnique({
       where: { id: payload.sub },
       select: {
@@ -101,4 +104,3 @@ export class AuthService {
     return user;
   }
 }
-

@@ -1,36 +1,39 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+## Frontend – Next.js App Router
 
-## Getting Started
+The UI provides authentication, a portfolio dashboard, and a chat workspace that talks to the NestJS backend.
 
-First, run the development server:
+### Tech Stack
+
+- Next.js 16 (App Router)
+- React 19 client components
+- Tailwind CSS v4 styles (via the `@import "tailwindcss"` macro)
+- Lightweight custom auth context (localStorage + JWT)
+
+### Setup
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+pnpm install
+cp env.example .env.local   # optional, defaults to http://localhost:3000/api
+pnpm dev                    # http://localhost:3001
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Environment variables:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+| Variable | Description |
+| --- | --- |
+| `NEXT_PUBLIC_API_BASE_URL` | Base REST URL (default: `http://localhost:3000/api`) |
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### Pages
 
-## Learn More
+| Route | Description |
+| --- | --- |
+| `/` | Simple marketing overview + CTA |
+| `/auth` | Combined login/register flow |
+| `/dashboard` | Portfolio summary, holdings table, and manual sync |
+| `/chat` | Conversation view with AI assistant |
 
-To learn more about Next.js, take a look at the following resources:
+### Notes
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- The auth context stores the bearer token in `localStorage` (`jaspers_token`) and automatically calls `/api/auth/me` to hydrate the session on refresh.
+- Protected pages show a friendly gate message when the user is not authenticated instead of redirecting abruptly.
+- API helpers live in `lib/api.ts` and mirror the backend routes.

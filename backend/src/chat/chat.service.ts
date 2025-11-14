@@ -181,4 +181,3 @@ User question: ${question}`;
       .join('\n');
   }
 }
-

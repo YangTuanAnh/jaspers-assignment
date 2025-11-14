@@ -19,4 +19,3 @@ export class PortfolioController {
     return this.portfolioService.syncPortfolio(user.id);
   }
 }
-

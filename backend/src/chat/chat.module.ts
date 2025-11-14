@@ -9,4 +9,3 @@ import { PortfolioModule } from '../portfolio/portfolio.module';
   controllers: [ChatController],
 })
 export class ChatModule {}
-
