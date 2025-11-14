@@ -2,7 +2,7 @@ import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { AuthUser } from '../auth/types/auth-user.type';
+import type { AuthUser } from '../auth/types/auth-user.type';
 import { SendMessageDto } from './dto/send-message.dto';
 
 @UseGuards(JwtAuthGuard)

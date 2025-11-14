@@ -2,7 +2,7 @@ import { Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { PortfolioService } from './portfolio.service';
 import { JwtAuthGuard } from '../common/guards/jwt-auth.guard';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
-import { AuthUser } from '../auth/types/auth-user.type';
+import type { AuthUser } from '../auth/types/auth-user.type';
 
 @UseGuards(JwtAuthGuard)
 @Controller('portfolio')
